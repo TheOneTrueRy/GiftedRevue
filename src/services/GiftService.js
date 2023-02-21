@@ -13,6 +13,12 @@ async getGifts(){
 
 async openGift(giftId){
   const res = await sandboxApi.put(`gifts/${giftId}`, {opened: true})
+  return res
+}
+
+async postGift(giftData){
+  const res = await sandboxApi.post('gifts', giftData)
+  AppState.gifts.push(new Gift(res.data))
 }
 }
 

@@ -1,8 +1,14 @@
 <template>
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-3">
-
+  <div class="row h-100">
+    <div class="col-3 bg-success px-4">
+      <form @submit.prevent="postGift()">
+        <label class="mt-4">Gift Description</label>
+        <input v-model="form.tag" required type="text" class="form-control">
+        <label class="mt-4">IMG URL</label>
+        <input v-model="form.url" required type="text" class="form-control">
+        <button type="submit" class="btn btn-light btn-outline-dark mt-4">Post Gift!</button>
+      </form>
     </div>
     <div class="col-9">
       <div class="row">
@@ -21,7 +27,7 @@
 </template>
 
 <script>
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { AppState } from "../AppState.js";
 import { giftService } from "../services/GiftService.js";
 import { logger } from "../utils/Logger.js";
@@ -29,11 +35,12 @@ import Pop from "../utils/Pop.js";
 
 export default {
   setup() {
+    const form = ref({})
     async function getGifts(){
       try {
         await giftService.getGifts()
       } catch (error) {
-        logger.log(error)
+        logger.error(error)
         Pop.error(error.message)
       }
     }
@@ -43,13 +50,24 @@ export default {
     })
 
     return {
+      form,
       gifts: computed(() => AppState.gifts),
       async openGift(giftId){
         try {
           await giftService.openGift(giftId)
         } catch (error) {
           Pop.error(error.message)
-          logger.log(error)
+          logger.error(error)
+        }
+      },
+      async postGift(){
+        try {
+          let formData = form.value
+          await giftService.postGift(formData)
+          form.value = {}
+        } catch (error) {
+          Pop.error(error)
+          logger.error(error)
         }
       }
     }
